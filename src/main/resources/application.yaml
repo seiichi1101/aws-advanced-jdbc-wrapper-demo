@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: aws-advanced-jdbc-wrapper-demo
+logging:  
+  level:  
+    software.amazon.jdbc: TRACE
+  file:
+    name: logs/app.log
+custom:
+  datasource:
+    url: ${DS_URL}
+    database: ${DS_DATABASE}
+    username: ${DS_USERNAME}
+    password: ${DS_PASSWORD}
