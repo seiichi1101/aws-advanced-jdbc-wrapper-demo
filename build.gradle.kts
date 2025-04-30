@@ -20,7 +20,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("software.amazon.jdbc:aws-advanced-jdbc-wrapper:2.3.5")
+    implementation("software.amazon.jdbc:aws-advanced-jdbc-wrapper:2.5.5")
     implementation("com.mysql:mysql-connector-j:8.0.33")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

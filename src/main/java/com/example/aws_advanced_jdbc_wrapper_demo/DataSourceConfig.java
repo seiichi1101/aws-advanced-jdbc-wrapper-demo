@@ -5,11 +5,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariConfig;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
 import javax.sql.DataSource;
 import software.amazon.jdbc.PropertyDefinition;
 import java.util.Properties;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import software.amazon.jdbc.HikariPooledConnectionProvider;
+import software.amazon.jdbc.Driver;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class DataSourceConfig {
@@ -22,32 +27,50 @@ public class DataSourceConfig {
     @Value("${custom.datasource.password}")
     private String PASSWORD;
 
-    private static final int CONNECTION_POOL_MAXIMUM_POOL_SIZE = 2;
+    // @Bean
+    // public DataSource customDataSource() {
+    //   // Setup Internal Connection Pool
+    //   Driver.setCustomConnectionProvider(
+    //     new HikariPooledConnectionProvider((host, props) -> {
+    //       HikariConfig cfg = new HikariConfig();
+    //       cfg.setMaximumPoolSize(30);
+    //       cfg.setValidationTimeout(TimeUnit.SECONDS.toMillis(1));
+    //       cfg.setConnectionTimeout(TimeUnit.SECONDS.toMillis(10));
+    //       return cfg;
+    //     })
+    //   );
+    //   // Setup DataSource
+    //   SimpleDriverDataSource ds = new SimpleDriverDataSource();
+    //   ds.setUsername(USERNAME);
+    //   ds.setPassword(PASSWORD);
+    //   ds.setDriverClass(Driver.class);
+    //   ds.setUrl(String.format("jdbc:aws-wrapper:mysql://%s:3306/%s", DATABASE_URL, DATABASE_NAME));
+    //   // Setup DataSource Properties
+    //   Properties targetDataSourceProps = new Properties();
+    //   targetDataSourceProps.setProperty(PropertyDefinition.PLUGINS.name, "initialConnection,auroraConnectionTracker,readWriteSplitting,failover2,efm2");
+    //   targetDataSourceProps.setProperty("readerHostSelectorStrategy", "roundRobin");
+    //   targetDataSourceProps.setProperty("wrapperDialect", "aurora-mysql");
+    //   targetDataSourceProps.setProperty("wrapperLoggerLevel", "ALL");
+    //   ds.setConnectionProperties(targetDataSourceProps);
 
-    private static final int CONNECTION_POOL_IDLE_TIMEOUT = 2;
+    //   return ds;
+    // }
 
     @Bean
-    public DataSource dataSource() {
-        HikariDataSource ds = new HikariDataSource();
+    public DataSource presetDataSource() {
+        // Setup DataSource
+        SimpleDriverDataSource ds = new SimpleDriverDataSource();
         ds.setUsername(USERNAME);
         ds.setPassword(PASSWORD);
-        ds.setMaximumPoolSize(CONNECTION_POOL_MAXIMUM_POOL_SIZE);
-        ds.setIdleTimeout(CONNECTION_POOL_IDLE_TIMEOUT);
-
-        ds.setDataSourceClassName(AwsWrapperDataSource.class.getName());
-        ds.addDataSourceProperty("jdbcProtocol", "jdbc:mysql:");
-        ds.addDataSourceProperty("serverName", DATABASE_URL);
-        ds.addDataSourceProperty("serverPort", "3306");
-        ds.addDataSourceProperty("database", DATABASE_NAME);
-        ds.addDataSourceProperty("targetDataSourceClassName", "com.mysql.cj.jdbc.MysqlDataSource");
-
+        ds.setDriverClass(Driver.class);
+        // User Presets F0: https://github.com/aws/aws-advanced-jdbc-wrapper/blob/main/docs/using-the-jdbc-driver/ConfigurationPresets.md
+        // https://github.com/aws/aws-advanced-jdbc-wrapper/blob/47f50ea9f0ab46a6352c24468080db9b7db0415b/wrapper/src/main/java/software/amazon/jdbc/profile/DriverConfigurationProfiles.java#L298
+        ds.setUrl(String.format("jdbc:aws-wrapper:mysql://%s:3306/%s?wrapperProfileName=F0", DATABASE_URL, DATABASE_NAME));
+        // Setup DataSource Properties
         Properties targetDataSourceProps = new Properties();
-        targetDataSourceProps.setProperty(PropertyDefinition.PLUGINS.name, "initialConnection,auroraConnectionTracker,readWriteSplitting,failover,efm2");
-        targetDataSourceProps.setProperty("readerHostSelectorStrategy", "random");
         targetDataSourceProps.setProperty("wrapperDialect", "aurora-mysql");
         targetDataSourceProps.setProperty("wrapperLoggerLevel", "ALL");
-
-        ds.addDataSourceProperty("targetDataSourceProperties", targetDataSourceProps);
+        ds.setConnectionProperties(targetDataSourceProps);
 
         return ds;
     }
