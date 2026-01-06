@@ -8,7 +8,7 @@ logging:
     name: logs/app.log
 custom:
   datasource:
-    url: ${DS_URL}
-    database: ${DS_DATABASE}
-    username: ${DS_USERNAME}
-    password: ${DS_PASSWORD}
+    url: TODO:
+    database: test
+    username: root
+    password: pass

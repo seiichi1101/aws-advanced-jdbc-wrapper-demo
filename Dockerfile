@@ -10,9 +10,4 @@ EXPOSE 8080
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar ./app.jar
 
-ENV DS_URL=""
-ENV DS_DATABASE=""
-ENV DS_USERNAME=""
-ENV DS_PASSWORD=""
-
 CMD ["java", "-jar", "/app/app.jar"]
