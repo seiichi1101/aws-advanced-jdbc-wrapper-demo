@@ -9,7 +9,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
@@ -20,7 +20,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("software.amazon.jdbc:aws-advanced-jdbc-wrapper:2.5.5")
+    implementation("software.amazon.jdbc:aws-advanced-jdbc-wrapper:4.1.0")
     implementation("com.mysql:mysql-connector-j:8.0.33")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

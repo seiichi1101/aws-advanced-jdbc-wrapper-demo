@@ -53,7 +53,7 @@ public class Main {
     public String sqlReader() {
         try {
             List<Map<String, Object>> result = jdbcTemplate.queryForList("SELECT * FROM user_accounts WHERE username = 'seiichi'");
-            return "Succeed: " + result.toString() + "\n";
+            return "Succeed: row " + result.size() + "\n";
         } catch (Exception e) {
             return "Failed: " + e.getMessage() + "\n";
         }

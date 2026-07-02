@@ -44,7 +44,7 @@ locals {
   aurora_master_password = "password"
 
   # EC2 Configuration
-  ec2_instance_type = "t3.micro"
+  ec2_instance_type = "t3.medium"
 }
 
 # ------------------------------------------------------------------------------
@@ -196,7 +196,7 @@ resource "aws_key_pair" "ec2" {
 # Amazon Linux2 latest image
 # ------------------------------------------------------------------------------
 data "aws_ssm_parameter" "amzn2_x86_64" {
-  name = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-ebs"
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
 # ------------------------------------------------------------------------------
@@ -213,7 +213,8 @@ resource "aws_instance" "app" {
   user_data = <<-EOF
               #!/bin/bash
               yum update -y
-              yum install -y java-17-amazon-corretto mysql
+              yum install -y git
+              sudo dnf install java-21-amazon-corretto-devel mariadb105 -y
               EOF
 
   tags = {
@@ -403,7 +404,7 @@ output "ec2_public_dns" {
 
 output "ssh_command" {
   description = "SSH command to connect to EC2"
-  value       = "ssh -i ~/.ssh/id_rsa ec2-user@${aws_instance.app.public_ip}"
+  value       = "ssh ec2-user@${aws_instance.app.public_ip}"
 }
 
 output "connection_info" {
