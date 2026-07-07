@@ -27,43 +27,38 @@ public class DataSourceConfig {
     @Value("${custom.datasource.password}")
     private String PASSWORD;
 
-     @Bean
-     public DataSource customDataSource() {
-       // Setup Internal Connection Pool
-       Driver.setCustomConnectionProvider(
-         new HikariPooledConnectionProvider((host, props) -> {
-           HikariConfig cfg = new HikariConfig();
-           cfg.setMaximumPoolSize(30);
-           // Discard stale connections to a dead node quickly (250ms is the Hikari minimum)
-           cfg.setValidationTimeout(250);
-           cfg.setConnectionTimeout(TimeUnit.SECONDS.toMillis(10));
-           return cfg;
-         })
-       );
-       // Setup DataSource
-       SimpleDriverDataSource ds = new SimpleDriverDataSource();
-       ds.setUsername(USERNAME);
-       ds.setPassword(PASSWORD);
-       ds.setDriverClass(Driver.class);
-       ds.setUrl(String.format("jdbc:aws-wrapper:mysql://%s:3306/%s", DATABASE_HOST, DATABASE_NAME));
-       // Setup DataSource Properties
-       Properties targetDataSourceProps = new Properties();
-       // Network-level timeouts; driver default is 0 (infinite), which makes
-       // requests hang forever when a node becomes unreachable
-       targetDataSourceProps.setProperty("connectTimeout", "1000");
-       targetDataSourceProps.setProperty("socketTimeout", "2000");
-       // The initialConnection plugin retries failed connects in its own loop
-       // for openConnectionRetryTimeoutMs (default 30000) before giving up,
-       // which delays the reader->writer fallback regardless of connectTimeout
-       targetDataSourceProps.setProperty("openConnectionRetryTimeoutMs", "1000");
-       targetDataSourceProps.setProperty(PropertyDefinition.PLUGINS.name, "initialConnection,auroraConnectionTracker,readWriteSplitting,failover2,efm2");
-       targetDataSourceProps.setProperty("readerHostSelectorStrategy", "roundRobin");
-       targetDataSourceProps.setProperty("wrapperDialect", "aurora-mysql");
-       targetDataSourceProps.setProperty("wrapperLoggerLevel", "ALL");
-       ds.setConnectionProperties(targetDataSourceProps);
+    @Bean
+    public DataSource customDataSource() {
+        Driver.setCustomConnectionProvider(
+                new HikariPooledConnectionProvider((host, props) -> {
+                    HikariConfig cfg = new HikariConfig();
 
-       return ds;
-     }
+                    // Maximum time to wait for a connection from the pool before throwing an exception
+                    cfg.setConnectionTimeout(2000);
+                    // Maximum time to wait for a connection to be validated as alive before throwing an exception
+                    cfg.setValidationTimeout(500);
+
+                    return cfg;
+                })
+        );
+
+        SimpleDriverDataSource ds = new SimpleDriverDataSource();
+        ds.setUsername(USERNAME);
+        ds.setPassword(PASSWORD);
+        ds.setDriverClass(Driver.class);
+        ds.setUrl(String.format("jdbc:aws-wrapper:mysql://%s:3306/%s", DATABASE_HOST, DATABASE_NAME));
+
+        Properties props = new Properties();
+        props.setProperty(PropertyDefinition.PLUGINS.name, "initialConnection,auroraConnectionTracker,readWriteSplitting,failover2,efm2");
+        props.setProperty("wrapperDialect", "aurora-mysql");
+        props.setProperty("wrapperLoggerLevel", "ALL");
+        // Maximum time to retry a connection before giving up
+        props.setProperty("openConnectionRetryTimeoutMs", "2000");
+
+        ds.setConnectionProperties(props);
+
+        return ds;
+    }
 
 //    @Bean
 //    public DataSource presetDataSource() {
