@@ -34,7 +34,7 @@ public class DataSourceConfig {
                     HikariConfig cfg = new HikariConfig();
 
                     // Maximum time to wait for a connection from the pool before throwing an exception
-                    cfg.setConnectionTimeout(2000);
+                    cfg.setConnectionTimeout(1000);
                     // Maximum time to wait for a connection to be validated as alive before throwing an exception
                     cfg.setValidationTimeout(500);
 
@@ -53,7 +53,7 @@ public class DataSourceConfig {
         props.setProperty("wrapperDialect", "aurora-mysql");
         props.setProperty("wrapperLoggerLevel", "ALL");
         // Maximum time to retry a connection before giving up
-        props.setProperty("openConnectionRetryTimeoutMs", "2000");
+        props.setProperty("openConnectionRetryTimeoutMs", "3000");
 
         ds.setConnectionProperties(props);
 
